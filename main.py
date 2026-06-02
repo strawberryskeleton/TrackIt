@@ -91,4 +91,10 @@ def ddtypechange(event=None):
 
 dropdown.bind("<<ComboboxSelected>>",ddtypechange)
 
+#custom deadline date field
+lb4=tk.Label(cframe,text='Deadline date (DD/MM/YYYY): ',font=wfont,bg=cardbg,fg=maintext)
+lb4.grid(row=4,column=0,sticky='w',pady=5)
+deadlinedate=tk.Entry(cframe,font=wfont,text=cd_type,relief='flat',highlightthickness=1,highlightbackground=bordercolor)
+deadlinedate.grid(row=4,column=1,pady=5)
+
 
