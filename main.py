@@ -35,9 +35,60 @@ btn3color= '#f54da6'
 
 bordercolor= '#4d0099'
 
+wfont= ('Segoe UI',10) #font for normal writing
+hfont= ('Segoe UI',22,'bold') #font for heading
+
 #creating main window
 win=tk.Tk()
 win.title('Deadline Calculator')
 win.minsize(width=600, height=600)
 win.configure(bg=mainbg) 
+
+#title frame 
+tframe=tk.Frame(win,bg=mainbg)
+tframe.pack(padx=5,pady=15)
+tlabel= tk.label(tframe, text='Deadline Tracker', font=hfont,fg=mainaccent, bg=mainbg)
+tlabel.pack()
+
+#card frame
+cframe=tk.Frame(win, bg=cardbg, padx=25,pady=25)
+cframe.pack(padx=20, pady=10)
+
+#event name field
+lb1=tk.Label(cframe, text="Event Name: ", bg=cardbg, fg=maintext, font=wfont)
+lb1.grid(row=0, column=0, sticky='w',pady=5)
+eventname=tk.Entry(cframe,font=wfont,relief='flat',highlightthickness=1,highlightbackground=bordercolor)
+eventname.grid(row=0,column=1,pady=5)
+
+#event date field
+lb2=tk.Label(cframe,text='Event Date(DD/MM/YYYY): ',bg=cardbg,fg=mainaccent,font=wfont)
+lb2.grid(row=1,column=0,sticky='w',pady=5)
+eventdate=tk.Entry(cframe,font=wfont,relief='flat',highlightthickness=1,highlightbackground=bordercolor)
+eventdate.grid(row=1,column=1,pady=5)
+
+#deadline type field
+lb3=tk.Label(cframe,text='Deadline Type: ',font=wfont,bg=cardbg,fg=maintext)
+lb3.grid(row=2,column=0,pady=5)
+
+d_type={'Complaint filing': 30, 'Response filing': 30, 'Notice issuing':7} #dict using type:no od days required
+dtypeSelect=tk.StringVar()
+dropdown= ttk.Combobox(cframe,textvariable=dtypeSelect,values=list(d_type.keys())+['Other'],)
+dropdown.grid(row=2,column=1,pady=5)
+
+#others option in deadline type field
+otherdl=tk.Label(cframe,text='Specify type: ',font=wfont,bg=cardbg,fg=maintext) #otherdeadlinelabel
+cd_type=StringVar()
+otherde= tk.Entry(cframe,font=wfont,text=cd_type, relief='flat',highlightthickness=1, highlightbackground=bordercolor) #otherdeadlineentry
+
+#function to show or remove the 'other' field: only shown if chosen in the dropdown menu
+def ddtypechange(event=None):
+    if dtypeSelect.get()=='Other':
+        otherdl.grid(row=3,column=0,sticky='w',padx=20, pady=5)
+        otherde.grid(row=3,column=1,pady=5)
+    else:
+        otherdl.grid_remove()
+        otherde.grid_remove()
+
+dropdown.bind("<<ComboboxSelected>>",ddtypechange)
+
 
