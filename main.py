@@ -19,24 +19,24 @@ sea green neon =#00e6e6
 blue neonish = #0080ff
 lightest purple accent = #e0ccff
 '''
-mainbg= '#c7a8f5' #main bg color 
+mainbg= '#EAEAF6' #main bg color 
 cardbg= '#FFFFFF' #color for the card (white)
 
-mainaccent= '#d9b3ff' #the main accent color ()
-secaccent= '' #secondary accent color ()
+mainaccent= '#233D78' #the main accent color ()
+secaccent= '4CFEF5' #secondary accent color ()
 
-maintext= '#000080'#main text color for the headings, etc. ()
-mutedtext= '' #for text not in use, or secondary texts ()
+maintext= '#214174'#main text color for the headings, etc. ()
+mutedtext= '#6B7280' #for text not in use, or secondary texts ()
 
-errorcolor= '#ff1a1a' #to highlight errors (red)
-successcolor= '#47d147'#''to show success messages (green)
+errorcolor= '#DC2626' #to highlight errors (red)
+successcolor= '#2CA25F'#''to show success messages (green)
 
-neutralbtn= '#FFFFFF'#color for any neutral btns like calculate btn?... 
-btn1color= '#f54da6' #will add as per no of buttons, similar scheme for main and accent colors
-btn2color= '##ffcb0f'
-btn3color= '#f54da6'
+neutralbtn= '#7D8CC3'#color for any neutral btns like calculate btn?... 
+btn1color= '#EA4F93' #will add as per no of buttons, similar scheme for main and accent colors
+btn2color= '#14A9BF'
+btn3color= '#F5BF17'
 
-bordercolor= '#4d0099'
+bordercolor= '#999999'
 
 wfont= ('Segoe UI',10) #font for normal writing
 hfont= ('Segoe UI',22,'bold') #font for heading
@@ -155,7 +155,46 @@ def cal_deadline():
         status.set('Invalid date input!')
         statusl.configure(fg=errorcolor)
 
-calbtn= tk.Button(btnframe,text='Calculate',command=cal_deadline,font=bfont, bg=mainaccent,fg='white',relief='flat')
+calbtn= tk.Button(btnframe,text='Calculate',command=cal_deadline,font=bfont, bg=neutralbtn,fg='white',relief='flat')
 calbtn.pack(pady=5)
+
+#btn 2: clear
+def clear_func():
+    eventname.delete(0,tk.END)
+    eventdate.delete(0,tk.END)
+    dtypeSelect.set('')
+    deadlinedate.delete(0,tk.END)
+    dropdown.configure(state='readonly')
+    otherde.grid_remove()
+    otherdl.grid_remove()
+    status.set('')
+
+clearbtn= tk.Button(btnframe,text='Clear', command=clear_func, font=bfont,relief='flat',bg=btn1color,fg='white')
+clearbtn.pack(pady=15)
+
+#new btn frame for grid option for secondary buttons
+btnframe2= tk.Frame(win, bg=mainbg)
+btnframe2.pack(pady=5)
+
+#save btn
+saved_events=[]
+def save_event():
+    if eventdate.get()=='':
+        status.set("Please calculate before saving!")
+        statusl.configure(fg=errorcolor)
+    else:
+        d_remain= (datetime.strptime(dateofdeadline.get(),"%d/%m/%Y").date() - date.today()).days
+        event_data={'event_name':eventname.get(),'event_date':eventdate.get(),'deadline_type':dtypeSelect.get(),'final_deadline':dateofdeadline.get(),'days_till':d_remain,
+        'notes':'','done':False}
+        saved_events.append(event_data)
+        clear_func()
+        status.set('Event saved successfully')
+        statusl.configure(fg=successcolor)
+
+savebtn= tk.Button(btnframe2,text='Save Event', command=save_event,font=bfont,bg=btn2color,fg='white',relief='flat')
+savebtn.grid(row=0,column=0,padx=10)
+
+statusl= tk.Label(btnframe2,textvariable=status,font=wfont,bg=mainbg,wraplength=500)
+statusl.grid(row=1,column=0,columnspan=2,pady=15)
 
 win.mainloop()
