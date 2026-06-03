@@ -1,6 +1,9 @@
 import tkinter as tk
 from tkinter import ttk, messagebox
-from datetime import datetime, date, timedata
+from datetime import datetime, date, timedelta
+
+# root = tk.Tk()
+# root.title("My App")
 
 #color scheme
 '''
@@ -19,7 +22,7 @@ lightest purple accent = #e0ccff
 mainbg= '#c7a8f5' #main bg color 
 cardbg= '#FFFFFF' #color for the card (white)
 
-mainaccent= '#0d228c' #the main accent color ()
+mainaccent= '#d9b3ff' #the main accent color ()
 secaccent= '' #secondary accent color ()
 
 maintext= '#000080'#main text color for the headings, etc. ()
@@ -28,7 +31,7 @@ mutedtext= '' #for text not in use, or secondary texts ()
 errorcolor= '#ff1a1a' #to highlight errors (red)
 successcolor= '#47d147'#''to show success messages (green)
 
-neutralbtn= #color for any neutral btns like calculate btn?... 
+neutralbtn= '#FFFFFF'#color for any neutral btns like calculate btn?... 
 btn1color= '#f54da6' #will add as per no of buttons, similar scheme for main and accent colors
 btn2color= '##ffcb0f'
 btn3color= '#f54da6'
@@ -37,6 +40,7 @@ bordercolor= '#4d0099'
 
 wfont= ('Segoe UI',10) #font for normal writing
 hfont= ('Segoe UI',22,'bold') #font for heading
+bfont= ('Segoe UI',11,'bold') #font for buttons
 
 #creating main window
 win=tk.Tk()
@@ -47,7 +51,7 @@ win.configure(bg=mainbg)
 #title frame 
 tframe=tk.Frame(win,bg=mainbg)
 tframe.pack(padx=5,pady=15)
-tlabel= tk.label(tframe, text='Deadline Tracker', font=hfont,fg=mainaccent, bg=mainbg)
+tlabel= tk.Label(tframe, text='Deadline Tracker', font=hfont,fg=mainaccent, bg=mainbg)
 tlabel.pack()
 
 #card frame
@@ -77,7 +81,7 @@ dropdown.grid(row=2,column=1,pady=5)
 
 #others option in deadline type field
 otherdl=tk.Label(cframe,text='Specify type: ',font=wfont,bg=cardbg,fg=maintext) #otherdeadlinelabel
-cd_type=StringVar()
+cd_type=tk.StringVar()
 otherde= tk.Entry(cframe,font=wfont,text=cd_type, relief='flat',highlightthickness=1, highlightbackground=bordercolor) #otherdeadlineentry
 
 #function to show or remove the 'other' field: only shown if chosen in the dropdown menu
@@ -97,4 +101,61 @@ lb4.grid(row=4,column=0,sticky='w',pady=5)
 deadlinedate=tk.Entry(cframe,font=wfont,text=cd_type,relief='flat',highlightthickness=1,highlightbackground=bordercolor)
 deadlinedate.grid(row=4,column=1,pady=5)
 
+#btn frame
+btnframe= tk.Frame(win,bg=mainbg)
+btnframe.pack(pady=10)
 
+status = tk.StringVar()
+
+#first btn: calc deadline
+dateofdeadline= tk.StringVar()
+
+def cal_deadline():
+    try:
+        ed=datetime.strptime(eventdate.get(),"%d/%m/%Y").date()
+        #case 1: user manually entered the deadline
+        if dtypeSelect.get()=='': #others option not selected
+            final_date= datetime.strptime(deadlinedate.get(),"%d/%m/%Y").date()
+            if final_date<ed:
+                status.set('Error: Deadline is before event date')
+                statusl.configure(fg=errorcolor)
+                return
+            else:
+                days_left= (final_date-ed).days
+                status.set(f"Number of day(s) left = {days_left}")
+                statusl.configure(fg=successcolor)
+                dateofdeadline.set(final_date.strftime('%d/%m/%Y'))
+        #case 2:
+        else:
+            if dtypeSelect.get() in d_type:
+                n_days= d_type.get(dtypeSelect.get(),0)
+                final_date= ed+ timedelta(days=n_days)
+                formatted= final_date.strftime('%d/%m/%Y')
+                status.set(f"Date of Deadline is: {formatted}")
+                statusl.configure(fg=successcolor)
+                dateofdeadline.set(formatted)
+            elif dtypeSelect.get()=='Other':
+                if not otherde or not cd_type.get().strip():
+                    f_date.set('Enter custom type and date')
+                    statusl.configure(fg=errorcolor)
+                    return
+                final_date=datetime.strptime(deadlinedate.get(),"%d/%m/%Y").date()
+                if final_date<ed:
+                    status.set("Error: Deadline is before the event date.")
+                    statusl.configure(fg=errorcolor)
+                else:
+                    days_left= (final_date-ed).days
+                    status.set(f"Number of day(s) = {days_left}")
+                    statusl.configure(fg=successcolor)
+                    dateofdeadline.set(final_date.strftime("%d/%m/%Y"))
+            else:
+                status.set('Select a deadline type or enter a date')
+                statusl.configure(fg=errorcolor)
+    except ValueError:
+        status.set('Invalid date input!')
+        statusl.configure(fg=errorcolor)
+
+calbtn= tk.Button(btnframe,text='Calculate',command=cal_deadline,font=bfont, bg=mainaccent,fg='white',relief='flat')
+calbtn.pack(pady=5)
+
+win.mainloop()
