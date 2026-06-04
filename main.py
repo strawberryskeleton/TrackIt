@@ -194,7 +194,187 @@ def save_event():
 savebtn= tk.Button(btnframe2,text='Save Event', command=save_event,font=bfont,bg=btn2color,fg='white',relief='flat')
 savebtn.grid(row=0,column=0,padx=10)
 
+#checkbox function
+def toggle_checkbox(event,tree):
+    row_id= tree.identify(event.y)
+    col= tree.identify(event.x)
+
+    if not row_id or col!='#1':
+        return
+    
+    values= list(tree.item(row_id,'values'))
+    current= values[0]
+
+    new_state= '☑' if current=='☐' else '☐'
+    values[0]=new_state
+
+    event_name= values[1]
+    for ev in saved_events:
+        if ev['event_name']==event_name:
+            ev['done']= (new_state=='☑')
+
+            if ev['done']:
+                tree.item(row_id,tags='completed')
+            else:
+                days_remaining= ev.get('days_till',0)
+                if days_remaining<0:
+                    tag='overdue'
+                elif days_remaining<=7:
+                    tag='urgent'
+                elif days_remaining<=14:
+                    tag='warning'
+                elif days_remaining<=21:
+                    tag='safe'
+                else:
+                    tag=''
+                tree.item(row_id,tags=(tag,))
+                break
+    tree.selection_remove(tree.selection())
+
+
+#notes func
+def open_notes(event_date):
+    detail_win= tk.Toplevel()
+    detail_win.title('Event Notes')
+    detail_win.geometry('450x450')
+
+    cdframe= tk.Frame(detail_win,bg=cardbg,padx=20,pady=20)
+    cdframe.pack(fill='both',expand=True,padx=20,pady=20)
+    title1 = tk.Label(cdframe,text='Event Notes',font=('Segoe UI',16,'bold'),fg=mainaccent,bg=cardbg)
+    title1.pack(anchor='w',pady=10)
+    evlabel= tk.Label(cdframe,text=f"Event: {event_data['event_name']}",font=('Segoe UI',11),fg=maintext,
+    bg=cardbg)
+    evlabel.pack(anchor='w',pady=15)
+    notesl= tk.Label(cdframe,text='Notes: ',font=bfont,fg=maintext,bg=cardbg)
+    notesl.pack(anchor='w')
+
+    #textbox for the notes
+    nbox= tk.Text(cdframe,height=10,width=40,font=('Segoe UI',10),wrap='word',borderwidth=2)
+    nbox.pack(fill='both',expand=True,padx=10,pady=5)
+
+    nbox.insert('1.0',event_data['notes']) #loading existing data if any
+
+    #saving the notes data
+    def save_notes():
+        event_data['notes']= nbx.get('1.0',tk.END).strip()
+        detail_win.destroy() #close win after saving
+    
+    savenotesbtn= tk.Button(cdframe,text='Save Notes',command=save_notes,font=bfont,fg='white',
+    bg=mainaccent, relief='flat')
+    savenotesbtn.pack(anchor='e',padx=10,pady=5)
+
+
+#delete func
+def delete_event(event_name,tree,row_id):
+    global saved_events
+    saved_events= [ev for ev in saved_events if ev['event_name']!= event_name]
+    tree.delete(row_id)
+
+
+#tree click handler function
+def tree_click_handler(event,tree):
+    row_id= tree.identify(event.y)
+    col= tree.identify(event.x)
+
+    if not row_id: #ie clicking outside the rows, then no action
+        return
+    if col=='#1': #checkbox
+        toggle_checkbox(event,tree)
+    if col=='#7': #notes
+        values= tree.item(row_id,'values')
+        event_name= values[1]
+        for ev in saved_events:
+            if ev['event_name']==event_name:
+                open_notes(ev)
+                break
+        return
+    if col=='#8': #delete
+        values= tree.item(row_id,'values')
+        event_name= values[1]
+
+        confirm= messagebox.askyesno('Delete Event',"Delete Event '(event_name)'?")
+
+        if confirm:
+            delete_event(event_name, tree, row_id)
+        return
+
+
+# funtion to show all events: table view
+def show_events():
+    if not saved_events: #nothing is saved
+        status.set('No events saved yet!')
+        statusl.config(fg=errorcolor)
+        return
+    
+    table_win = tk.Toplevel(win)    # independent window
+    table_win.title('All Saved Events')
+    table_win.geometry('800x450')
+
+    columns = ('done',  'event_name',  'deadline_type', 'event_date',  'final_deadline',  'days_till', 'notes', 'delete')
+
+    tree = ttk.Treeview(table_win, columns=columns, show='headings')
+    tree.pack(fill='both', expand=True)
+
+    tree.heading('done', text='✔') #header row
+    tree.column('done', window=40, anchor='center') #column
+    tree.heading('event_name', text='Event')
+    tree.column('event_name', width=100, anchor='w')
+    tree.heading('deadline_type', text='Type')
+    tree.column('deadline_type', width=100, anchor='w')
+    tree.heading('event_date', text='Event Date')
+    tree.column('event_date', width=100, anchor='center')
+    tree.heading('final_deadline',text='Deadline Date')
+    tree.column('final_deadline',width=100,anchor='center')
+    tree.heading('days_till',text='Day(s) till D-Day')
+    tree.column('days_till',width=100,anchor='center')
+    tree.heading('notes',text='Notes')
+    tree.column('notes',width=100,anchor='center')
+    tree.heading('delete',text='Delete')
+    tree.column('delete',width=100,anchor='center')
+
+    #traffic light system: configured as tags
+    tree.tag_configure('overdue',background='#F2F2F2',foreground='#000000')
+    tree.tag_configure('urgent',background='#FFC7CE',foreground="#9C0006")
+    tree.tag_configure('warning',background='#FFEB9C',foreground='#9C5700')
+    tree.tag_configure('safe',background='#C6EFCE',foreground='#006100')
+    tree.tag_configure('completed',background='#E0E0E0',foreground='#777777')
+
+    #assign tags
+    for ev in saved_events:
+        days_remaining= ev.get('days_till',0)
+
+        if ev['done']:
+            tag='completed'
+        elif days_remaining<0:
+            tag='overdue'
+        elif days_remaining<=7:
+            tag='urgent'
+        elif days_remaining<=14:
+            tag='warning'
+        elif days_remaining<=21:
+            tag='safe'
+        else:
+            tag=''
+        
+        #checking val for each row now
+        check_symbol= '☑' if ev['done'] else '☐'
+        
+        values=(check_symbol,ev['event_name'],ev['deadline_type'],ev['event_date'],ev['final_deadline'],
+        ev['days_till'],'📝','🗑️')
+        tree.insert('',tk.END,values=values,tags=(tag,))
+    
+    status.set('Events shown in new window')
+    statusl.configure(fg=successcolor)
+
+    tree.bind("<ButtonRelease-1>", lambda e: tree_click_handler(e,tree))
+
+
+
+
+# msg display
 statusl= tk.Label(btnframe2,textvariable=status,font=wfont,bg=mainbg,wraplength=500)
 statusl.grid(row=1,column=0,columnspan=2,pady=15)
+
+
 
 win.mainloop()
