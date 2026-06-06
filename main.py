@@ -76,13 +76,13 @@ lb3.grid(row=2,column=0,pady=5)
 
 d_type={'Complaint filing': 30, 'Response filing': 30, 'Notice issuing':7} #dict using type:no od days required
 dtypeSelect=tk.StringVar()
-dropdown= ttk.Combobox(cframe,textvariable=dtypeSelect,values=list(d_type.keys())+['Other'],)
+dropdown= ttk.Combobox(cframe,textvariable=dtypeSelect,values=list(d_type.keys())+['Other'])
 dropdown.grid(row=2,column=1,pady=5)
 
 #others option in deadline type field
 otherdl=tk.Label(cframe,text='Specify type: ',font=wfont,bg=cardbg,fg=maintext) #otherdeadlinelabel
 cd_type=tk.StringVar()
-otherde= tk.Entry(cframe,font=wfont,text=cd_type, relief='flat',highlightthickness=1, highlightbackground=bordercolor) #otherdeadlineentry
+otherde= tk.Entry(cframe,font=wfont,textvariable=cd_type, relief='flat',highlightthickness=1, highlightbackground=bordercolor) #otherdeadlineentry
 
 #function to show or remove the 'other' field: only shown if chosen in the dropdown menu
 def ddtypechange(event=None):
@@ -98,7 +98,8 @@ dropdown.bind("<<ComboboxSelected>>",ddtypechange)
 #custom deadline date field
 lb4=tk.Label(cframe,text='Deadline date (DD/MM/YYYY): ',font=wfont,bg=cardbg,fg=maintext)
 lb4.grid(row=4,column=0,sticky='w',pady=5)
-deadlinedate=tk.Entry(cframe,font=wfont,text=cd_type,relief='flat',highlightthickness=1,highlightbackground=bordercolor)
+deadlinedate_type = tk.StringVar()
+deadlinedate=tk.Entry(cframe,font=wfont,textvariable=deadlinedate_type,relief='flat',highlightthickness=1,highlightbackground=bordercolor)
 deadlinedate.grid(row=4,column=1,pady=5)
 
 #btn frame
@@ -136,7 +137,7 @@ def cal_deadline():
                 dateofdeadline.set(formatted)
             elif dtypeSelect.get()=='Other':
                 if not otherde or not cd_type.get().strip():
-                    f_date.set('Enter custom type and date')
+                    final_date.set('Enter custom type and date')
                     statusl.configure(fg=errorcolor)
                     return
                 final_date=datetime.strptime(deadlinedate.get(),"%d/%m/%Y").date()
@@ -155,7 +156,7 @@ def cal_deadline():
         status.set('Invalid date input!')
         statusl.configure(fg=errorcolor)
 
-calbtn= tk.Button(btnframe,text='Calculate',command=cal_deadline,font=bfont, bg=neutralbtn,fg='white',relief='flat')
+calbtn= tk.Button(btnframe,text='Calculate',command=cal_deadline,font=bfont, bg=mainaccent,fg='white',relief='flat')
 calbtn.pack(pady=5)
 
 #btn 2: clear
@@ -183,8 +184,12 @@ def save_event():
         status.set("Please calculate before saving!")
         statusl.configure(fg=errorcolor)
     else:
+        actual_deadline_type = dtypeSelect.get()
+        if actual_deadline_type == 'Other':
+            actual_deadline_type = cd_type.get().strip() or 'Other'
+
         d_remain= (datetime.strptime(dateofdeadline.get(),"%d/%m/%Y").date() - date.today()).days
-        event_data={'event_name':eventname.get(),'event_date':eventdate.get(),'deadline_type':dtypeSelect.get(),'final_deadline':dateofdeadline.get(),'days_till':d_remain,
+        event_data={'event_name':eventname.get(),'event_date':eventdate.get(),'deadline_type':actual_deadline_type,'final_deadline':dateofdeadline.get(),'days_till':d_remain,
         'notes':'','done':False}
         saved_events.append(event_data)
         clear_func()
@@ -194,10 +199,25 @@ def save_event():
 savebtn= tk.Button(btnframe2,text='Save Event', command=save_event,font=bfont,bg=btn2color,fg='white',relief='flat')
 savebtn.grid(row=0,column=0,padx=10)
 
+
+
+#timeline view
+def open_timeline():
+    timeline_win= tk.Toplevel(win)
+    timeline_win.title('Events Timeline')
+    timeline_win.geometry('1150x600')
+    timeline_win.configure(bg=mainbg)
+
+
+
+
+
+
+#table view
 #checkbox function
 def toggle_checkbox(event,tree):
-    row_id= tree.identify(event.y)
-    col= tree.identify(event.x)
+    row_id= tree.identify_row(event.y)
+    col= tree.identify_column(event.x)
 
     if not row_id or col!='#1':
         return
@@ -233,7 +253,7 @@ def toggle_checkbox(event,tree):
 
 
 #notes func
-def open_notes(event_date):
+def open_notes(event_data):
     detail_win= tk.Toplevel()
     detail_win.title('Event Notes')
     detail_win.geometry('450x450')
@@ -256,7 +276,7 @@ def open_notes(event_date):
 
     #saving the notes data
     def save_notes():
-        event_data['notes']= nbx.get('1.0',tk.END).strip()
+        event_data['notes']= nbox.get('1.0',tk.END).strip()
         detail_win.destroy() #close win after saving
     
     savenotesbtn= tk.Button(cdframe,text='Save Notes',command=save_notes,font=bfont,fg='white',
@@ -273,8 +293,8 @@ def delete_event(event_name,tree,row_id):
 
 #tree click handler function
 def tree_click_handler(event,tree):
-    row_id= tree.identify(event.y)
-    col= tree.identify(event.x)
+    row_id= tree.identify_row(event.y)
+    col= tree.identify_column(event.x)
 
     if not row_id: #ie clicking outside the rows, then no action
         return
@@ -316,7 +336,7 @@ def show_events():
     tree.pack(fill='both', expand=True)
 
     tree.heading('done', text='✔') #header row
-    tree.column('done', window=40, anchor='center') #column
+    tree.column('done', width=40, anchor='center') #column
     tree.heading('event_name', text='Event')
     tree.column('event_name', width=100, anchor='w')
     tree.heading('deadline_type', text='Type')
@@ -368,13 +388,20 @@ def show_events():
 
     tree.bind("<ButtonRelease-1>", lambda e: tree_click_handler(e,tree))
 
+    #new frame for timeline view
+    footer= tk.Frame(table_win,bg=mainbg,pady=10)
+    footer.pack(fill='x')
 
+    timelinebtn= tk.Button(footer,text='View Timeline',command=open_timeline,font=bfont,bg=mainaccent,fg='white',relief='flat')
+    timelinebtn.pack()
+
+allsaved=tk.Button(btnframe2,text='Show all',command=show_events,font=bfont,relief='flat',bg=btn3color,fg='white')
+allsaved.grid(row=0,column=1,padx=10)
 
 
 # msg display
 statusl= tk.Label(btnframe2,textvariable=status,font=wfont,bg=mainbg,wraplength=500)
 statusl.grid(row=1,column=0,columnspan=2,pady=15)
-
 
 
 win.mainloop()
