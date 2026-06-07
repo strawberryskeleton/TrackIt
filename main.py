@@ -2,8 +2,6 @@ import tkinter as tk
 from tkinter import ttk, messagebox
 from datetime import datetime, date, timedelta
 
-# root = tk.Tk()
-# root.title("My App")
 
 # color scheme
 """
@@ -19,6 +17,7 @@ sea green neon =#00e6e6
 blue neonish = #0080ff
 lightest purple accent = #e0ccff
 """
+
 mainbg = "#EAEAF6"  # main bg color
 cardbg = "#FFFFFF"  # color for the card (white)
 
@@ -48,6 +47,24 @@ win = tk.Tk()
 win.title("Deadline Calculator")
 win.minsize(width=600, height=600)
 win.configure(bg=mainbg)
+
+# --- MAC COLOR FIX  ---
+style = ttk.Style()
+style.theme_use('clam')  #remove apple's default styling
+
+# custom button styles
+style.configure('Main.TButton', background=mainaccent, foreground='white', font=bfont, borderwidth=0)
+style.map('Main.TButton', background=[('active', mainaccent)])
+
+style.configure('Clear.TButton', background=btn1color, foreground='white', font=bfont, borderwidth=0)
+style.map('Clear.TButton', background=[('active', btn1color)])
+
+style.configure('Save.TButton', background=btn2color, foreground='white', font=bfont, borderwidth=0)
+style.map('Save.TButton', background=[('active', btn2color)])
+
+style.configure('Show.TButton', background=btn3color, foreground='white', font=bfont, borderwidth=0)
+style.map('Show.TButton', background=[('active', btn3color)])
+
 
 # title frame
 tframe = tk.Frame(win, bg=mainbg)
@@ -201,15 +218,16 @@ def cal_deadline():
         statusl.configure(fg=errorcolor)
 
 
-calbtn = tk.Button(
-    btnframe,
-    text="Calculate",
-    command=cal_deadline,
-    font=bfont,
-    bg=mainaccent,
-    fg="white",
-    relief="flat",
-)
+# calbtn = ttk.Button(
+#     btnframe,
+#     text="Calculate",
+#     command=cal_deadline,
+#     font=bfont,
+#     bg=mainaccent,
+#     fg="white",
+#     relief="flat",
+# )
+calbtn = ttk.Button(btnframe, text='Calculate', command=cal_deadline, style='Main.TButton')
 calbtn.pack(pady=5)
 
 
@@ -226,15 +244,16 @@ def clear_func():
     status.set("")
 
 
-clearbtn = tk.Button(
-    btnframe,
-    text="Clear",
-    command=clear_func,
-    font=bfont,
-    relief="flat",
-    bg=btn1color,
-    fg="white",
-)
+# clearbtn = ttk.Button(
+#     btnframe,
+#     text="Clear",
+#     command=clear_func,
+#     font=bfont,
+#     relief="flat",
+#     bg=btn1color,
+#     fg="white",
+# )
+clearbtn = ttk.Button(btnframe, text='Clear', command=clear_func, style='Clear.TButton')
 clearbtn.pack(pady=15)
 
 # new btn frame for grid option for secondary buttons
@@ -272,15 +291,16 @@ def save_event():
         statusl.configure(fg=successcolor)
 
 
-savebtn = tk.Button(
-    btnframe2,
-    text="Save Event",
-    command=save_event,
-    font=bfont,
-    bg=btn2color,
-    fg="white",
-    relief="flat",
-)
+# savebtn = ttk.Button(
+#     btnframe2,
+#     text="Save Event",
+#     command=save_event,
+#     font=bfont,
+#     bg=btn2color,
+#     fg="white",
+#     relief="flat",
+# )
+savebtn = ttk.Button(btnframe2, text='Save Event', command=save_event, style='Save.TButton')
 savebtn.grid(row=0, column=0, padx=10)
 
 
@@ -614,27 +634,29 @@ def show_events():
     footer = tk.Frame(table_win, bg=mainbg, pady=10)
     footer.pack(fill="x")
 
-    timelinebtn = tk.Button(
-        footer,
-        text="View Timeline",
-        command=open_timeline,
-        font=bfont,
-        bg=mainaccent,
-        fg="white",
-        relief="flat",
-    )
+    # timelinebtn = ttk.Button(
+    #     footer,
+    #     text="View Timeline",
+    #     command=open_timeline,
+    #     font=bfont,
+    #     bg=mainaccent,
+    #     fg="white",
+    #     relief="flat",
+    # )
+    timelinebtn = ttk.Button(footer, text='View Timeline', command=open_timeline, style='Main.TButton')
     timelinebtn.pack()
 
 
-allsaved = tk.Button(
-    btnframe2,
-    text="Show all",
-    command=show_events,
-    font=bfont,
-    relief="flat",
-    bg=btn3color,
-    fg="white",
-)
+# allsaved = ttk.Button(
+#     btnframe2,
+#     text="Show all",
+#     command=show_events,
+#     font=bfont,
+#     relief="flat",
+#     bg=btn3color,
+#     fg="white",
+# )
+allsaved = ttk.Button(btnframe2, text='Show all', command=show_events, style='Show.TButton')
 allsaved.grid(row=0, column=1, padx=10)
 
 
