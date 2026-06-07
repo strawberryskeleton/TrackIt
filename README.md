@@ -1,9 +1,35 @@
 # TrackIt
 
-deadline tracker in python using tkinter library
+Deadline tracker for lawyers in python using tkinter library
 
-Features:
+## Features:
 - track deadlines
 - use ui library ttkbootstrap
 - multiple views (table view, timeline view)
 - highlights for today's date and traffic light system for overall better ux
+
+## Screenshots
+
+main app view
+![main app view](./screenshots/main_app.png)
+
+all events - table view
+![table view](./screenshots/table_view.png)
+
+timeline view
+![timeline view](./screenshots/timeline_view.png)
+
+## Why I Made This
+When i was looking for app inspiration for particular use case (brainstorming loosely with ai), I came acroos this idea for building a deadline tracker for a profession. I considered doctor, etc. but ended up choosing lawyer since I didn't know much about the other professions and my sister is a lawyer so i could ask for some basic things.
+
+## Learnings
+- better learnt python since I only knew some basics before
+- learnt tkinter and making apps with it [this is my first app with GUI using tkinter/python]
+- did a lot of debugging
+- learnt how to create executable file for apps
+
+## Credits
+- made by: [me](https://github.com/strawberryskeleton)
+- idea refinement help: my sister
+- libraries used: tkinter
+- some debugging help (for color correcting on mac) from Gemini AI
