@@ -87,7 +87,7 @@ eventdate.grid(row=1, column=1, pady=5)
 
 # deadline type field
 lb3 = tk.Label(cframe, text="Deadline Type:", font=wfont, bg=cardbg, fg=maintext)
-lb3.grid(row=2, column=0, sticky='w', pady=5)
+lb3.grid(row=2, column=0, sticky="w", pady=5)
 
 d_type = {
     "Complaint filing": 30,
@@ -195,7 +195,7 @@ def cal_deadline():
             else:
                 status.set("Select a deadline type or enter a date")
                 statusl.configure(fg=errorcolor)
-    
+
     except ValueError:
         status.set("Invalid date input!")
         statusl.configure(fg=errorcolor)
@@ -218,7 +218,7 @@ def clear_func():
     eventname.delete(0, tk.END)
     eventdate.delete(0, tk.END)
     dtypeSelect.set("")
-    cd_type.set('')
+    cd_type.set("")
     deadlinedate.delete(0, tk.END)
     dropdown.configure(state="readonly")
     otherde.grid_remove()
@@ -243,6 +243,7 @@ btnframe2.pack(pady=5)
 
 # save btn
 saved_events = []
+
 
 def save_event():
     if eventdate.get() == "":
@@ -283,7 +284,6 @@ savebtn = tk.Button(
 savebtn.grid(row=0, column=0, padx=10)
 
 
-
 # table view
 # checkbox function
 def toggle_checkbox(event, tree):
@@ -304,7 +304,7 @@ def toggle_checkbox(event, tree):
     event_name = values[1]
     for ev in saved_events:
         if ev["event_name"] == event_name:
-            ev["done"] = (new_state == "☑")
+            ev["done"] = new_state == "☑"
 
             if ev["done"]:
                 tree.item(row_id, tags="completed")
@@ -414,14 +414,15 @@ def tree_click_handler(event, tree):
 
 # timeline view
 def urgency_color(days_left):
-    if days_left>=14:
+    if days_left >= 14:
         return "#2CA25F"
-    elif 7<= days_left <14:
+    elif 7 <= days_left < 14:
         return "#F1B82D"
-    elif 0< days_left <7:
+    elif 0 < days_left < 7:
         return "#DC2626"
     else:
         return "#E0E0E0"
+
 
 def open_timeline():
     if not saved_events:
@@ -434,70 +435,93 @@ def open_timeline():
     timeline_win.configure(bg=mainbg)
 
     header = tk.Frame(timeline_win, bg=cardbg, padx=20, pady=15)
-    header.pack(padx=20, pady=10, anchor='center')
+    header.pack(padx=20, pady=10, anchor="center")
 
-    headl = tk.Label(header, text=f'Deadline Timeline ({len(saved_events)} events)', font=bfont, fg=mainaccent, bg=mainbg)
-    headl.pack(anchor='w')
-
+    headl = tk.Label(
+        header,
+        text=f"Deadline Timeline ({len(saved_events)} events)",
+        font=bfont,
+        fg=mainaccent,
+        bg=mainbg,
+    )
+    headl.pack(anchor="w")
 
     # prepare dates
     p_events = []
 
     for ev in saved_events:
-        start = datetime.strptime(ev['event_date'], '%d/%m/%Y').date()
-        end = datetime.strptime(ev['final_deadline'], '%d/%m/%Y').date()
+        start = datetime.strptime(ev["event_date"], "%d/%m/%Y").date()
+        end = datetime.strptime(ev["final_deadline"], "%d/%m/%Y").date()
         p_events.append((ev, start, end))
 
-    start_date = min(e[1] for e in p_events)  #earliest date
-    end_date = max(e[2] for e in p_events)    #latest date
+    start_date = min(e[1] for e in p_events)  # earliest date
+    end_date = max(e[2] for e in p_events)  # latest date
 
     total_days = (end_date - start_date).days + 1
     px_per_day = 18
     left_margin = 220
 
-    #creating canvas
-    canvas = tk.Canvas(timeline_win, bg='white', height=450, width=1100, highlightthickness=0)
-    canvas.pack(fill='both', expand=True, padx=20, pady=10)
-
+    # creating canvas
+    canvas = tk.Canvas(
+        timeline_win, bg="white", height=450, width=1100, highlightthickness=0
+    )
+    canvas.pack(fill="both", expand=True, padx=20, pady=10)
 
     def x_from_date(d):
         return (d - start_date).days * px_per_day + left_margin
-    
+
     y_scale = 50
-    for i in range(0, total_days, 5):   #step 5 for every 5 days display
+    for i in range(0, total_days, 5):  # step 5 for every 5 days display
         d = start_date + timedelta(days=i)
         x = x_from_date(d)
-        canvas.create_text(x, y_scale, text=d.strftime('%b %d'), fill=mutedtext, font=wfont)
-    
+        canvas.create_text(
+            x, y_scale, text=d.strftime("%b %d"), fill=mutedtext, font=wfont
+        )
 
     # creating Today line
     today = date.today()
     if start_date <= today <= end_date:
         x_today = x_from_date(today)
-        canvas.create_line(x_today, y_scale + 10, x_today, 440, fill='red', dash=(4,2))
-        canvas.create_text(x_today, y_scale - 8, text='Today', fill='red', font=wfont)
+        canvas.create_line(x_today, y_scale + 10, x_today, 440, fill="red", dash=(4, 2))
+        canvas.create_text(x_today, y_scale - 8, text="Today", fill="red", font=wfont)
 
-    #adding each event
-    row_h= 55
-    bar_h= 22
-    start_y= 90
+    # adding each event
+    row_h = 55
+    bar_h = 22
+    start_y = 90
 
-    for i, (ev,s,e) in enumerate(p_events):
+    for i, (ev, s, e) in enumerate(p_events):
         y = start_y + i * row_h
-        days_left= (e-today).days
-        canvas.create_text(20,y,text=ev['event_name'],anchor='w',font=bfont)
-        canvas.create_text(20,y+16,text=f"{s:%d %b} → {e: %d %b}",anchor='w',fill=mutedtext,
-                            font=('Segoe UI',9))
-                            
-        x1= x_from_date(s)
-        x2= x_from_date(e)
+        days_left = (e - today).days
+        canvas.create_text(20, y, text=ev["event_name"], anchor="w", font=bfont)
+        canvas.create_text(
+            20,
+            y + 16,
+            text=f"{s:%d %b} → {e: %d %b}",
+            anchor="w",
+            fill=mutedtext,
+            font=("Segoe UI", 9),
+        )
 
-        canvas.create_rectangle(x1, y-bar_h//2,
-                                x2, y+bar_h//2,
-                                fill=urgency_color(days_left),outline='')
-        canvas.create_text(x1+6,y, text=f"{days_left}d",anchor='w',
-                            fill='white',font=('Segoe UI',9,'bold'))
-        
+        x1 = x_from_date(s)
+        x2 = x_from_date(e)
+
+        canvas.create_rectangle(
+            x1,
+            y - bar_h // 2,
+            x2,
+            y + bar_h // 2,
+            fill=urgency_color(days_left),
+            outline="",
+        )
+        canvas.create_text(
+            x1 + 6,
+            y,
+            text=f"{days_left}d",
+            anchor="w",
+            fill="white",
+            font=("Segoe UI", 9, "bold"),
+        )
 
 
 # funtion to show all events: table view
