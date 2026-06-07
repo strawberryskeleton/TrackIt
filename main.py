@@ -513,7 +513,7 @@ def open_timeline():
     for i, (ev, s, e) in enumerate(p_events):
         y = start_y + i * row_h
         days_left = (e - today).days
-        canvas.create_text(20, y, text=ev["event_name"], anchor="w", font=bfont)
+        canvas.create_text(20, y, text=ev["event_name"], anchor="w", font=bfont, fill=maintext)
         canvas.create_text(
             20,
             y + 16,
