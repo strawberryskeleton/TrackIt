@@ -433,10 +433,10 @@ def open_timeline():
     timeline_win.geometry("1150x600")
     timeline_win.configure(bg=mainbg)
 
-    header = tk.Frame(timeline_win, bg=mainbg, padx=20, pady=15)
+    header = tk.Frame(timeline_win, bg=cardbg, padx=20, pady=15)
     header.pack(padx=20, pady=10, anchor='center')
 
-    headl = tk.Label(header, text=f'Deadline Timeline ({len(saved_events)})', font=bfont, fg=mainaccent, bg=mainbg)
+    headl = tk.Label(header, text=f'Deadline Timeline ({len(saved_events)} events)', font=bfont, fg=mainaccent, bg=mainbg)
     headl.pack(anchor='w')
 
 
@@ -448,8 +448,8 @@ def open_timeline():
         end = datetime.strptime(ev['final_deadline'], '%d/%m/%Y').date()
         p_events.append((ev, start, end))
 
-    start_date = min(ev[1] for ev in p_events)  #earliest date
-    end_date = max(ev[2] for ev in p_events)    #latest date
+    start_date = min(e[1] for e in p_events)  #earliest date
+    end_date = max(e[2] for e in p_events)    #latest date
 
     total_days = (end_date - start_date).days + 1
     px_per_day = 18
@@ -460,43 +460,44 @@ def open_timeline():
     canvas.pack(fill='both', expand=True, padx=20, pady=10)
 
 
-    def px_from_date(d):
+    def x_from_date(d):
         return (d - start_date).days * px_per_day + left_margin
     
     y_scale = 50
     for i in range(0, total_days, 5):   #step 5 for every 5 days display
         d = start_date + timedelta(days=i)
-        x = px_from_date(d)
+        x = x_from_date(d)
         canvas.create_text(x, y_scale, text=d.strftime('%b %d'), fill=mutedtext, font=wfont)
     
 
     # creating Today line
     today = date.today()
     if start_date <= today <= end_date:
-        px_today = px_from_date(today)
-        canvas.create_line(px_today, y_scale + 10, px_today, 440, fill='red', dash=(4,2))
-        canvas.create_text(px_today, y_scale - 8, text='Today', fill='red', font=wfont)
+        x_today = x_from_date(today)
+        canvas.create_line(x_today, y_scale + 10, x_today, 440, fill='red', dash=(4,2))
+        canvas.create_text(x_today, y_scale - 8, text='Today', fill='red', font=wfont)
 
-        #adding each event
-        row_h= 55
-        bar_h= 22
-        start_y= 90
+    #adding each event
+    row_h= 55
+    bar_h= 22
+    start_y= 90
 
-        for i, (ev,s,e) in enumerate(p_events):
-            y = start_y + i * row_h
-            days_left= (e-today).days
-            canvas.create_text(20,y,text=ev['event_name'],anchor='w',font=bfont)
-            canvas.create_text(20,y,text=f"{s:%d %b} → {e: %d %b}",anchor='w',fill=mutedtext,
-                               font=('Segoe UI',9))
-            x1= px_from_date(s)
-            x2= px_from_date(e)
+    for i, (ev,s,e) in enumerate(p_events):
+        y = start_y + i * row_h
+        days_left= (e-today).days
+        canvas.create_text(20,y,text=ev['event_name'],anchor='w',font=bfont)
+        canvas.create_text(20,y+16,text=f"{s:%d %b} → {e: %d %b}",anchor='w',fill=mutedtext,
+                            font=('Segoe UI',9))
+                            
+        x1= x_from_date(s)
+        x2= x_from_date(e)
 
-            canvas.create_rectangle(x1, y-bar_h//2,
-                                    x2, y+bar_h//2,
-                                    fill=urgency_color(days_left),outline='')
-            canvas.create_text(x1+6,y, text=f"{days_left}d",anchor='w',
-                               fill='white',font=('Segoe UI',9,'bold'))
-            
+        canvas.create_rectangle(x1, y-bar_h//2,
+                                x2, y+bar_h//2,
+                                fill=urgency_color(days_left),outline='')
+        canvas.create_text(x1+6,y, text=f"{days_left}d",anchor='w',
+                            fill='white',font=('Segoe UI',9,'bold'))
+        
 
 
 # funtion to show all events: table view
