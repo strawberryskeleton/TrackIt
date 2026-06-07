@@ -42,6 +42,7 @@ wfont = ("Segoe UI", 10)  # font for normal writing
 hfont = ("Segoe UI", 22, "bold")  # font for heading
 bfont = ("Segoe UI", 11, "bold")  # font for buttons
 
+
 # creating main window
 win = tk.Tk()
 win.title("Deadline Calculator")
@@ -72,7 +73,7 @@ eventname.grid(row=0, column=1, pady=5)
 
 # event date field
 lb2 = tk.Label(
-    cframe, text="Event Date(DD/MM/YYYY): ", bg=cardbg, fg=mainaccent, font=wfont
+    cframe, text="Event Date(DD/MM/YYYY): ", bg=cardbg, fg=maintext, font=wfont
 )
 lb2.grid(row=1, column=0, sticky="w", pady=5)
 eventdate = tk.Entry(
@@ -85,8 +86,8 @@ eventdate = tk.Entry(
 eventdate.grid(row=1, column=1, pady=5)
 
 # deadline type field
-lb3 = tk.Label(cframe, text="Deadline Type: ", font=wfont, bg=cardbg, fg=maintext)
-lb3.grid(row=2, column=0, pady=5)
+lb3 = tk.Label(cframe, text="Deadline Type:", font=wfont, bg=cardbg, fg=maintext)
+lb3.grid(row=2, column=0, sticky='w', pady=5)
 
 d_type = {
     "Complaint filing": 30,
@@ -101,7 +102,7 @@ dropdown.grid(row=2, column=1, pady=5)
 
 # others option in deadline type field
 otherdl = tk.Label(
-    cframe, text="Specify type: ", font=wfont, bg=cardbg, fg=maintext
+    cframe, text="Specify type:", font=wfont, bg=cardbg, fg=maintext
 )  # otherdeadlinelabel
 cd_type = tk.StringVar()
 otherde = tk.Entry(
@@ -111,7 +112,7 @@ otherde = tk.Entry(
     relief="flat",
     highlightthickness=1,
     highlightbackground=bordercolor,
-)  # otherdeadlineentry
+)  # other deadline entry
 
 
 # function to show or remove the 'other' field: only shown if chosen in the dropdown menu
@@ -131,11 +132,11 @@ lb4 = tk.Label(
     cframe, text="Deadline date (DD/MM/YYYY): ", font=wfont, bg=cardbg, fg=maintext
 )
 lb4.grid(row=4, column=0, sticky="w", pady=5)
-deadlinedate_type = tk.StringVar()
+# deadlinedate_type = tk.StringVar()
 deadlinedate = tk.Entry(
     cframe,
     font=wfont,
-    textvariable=deadlinedate_type,
+    # textvariable=deadlinedate_type,
     relief="flat",
     highlightthickness=1,
     highlightbackground=bordercolor,
@@ -175,16 +176,17 @@ def cal_deadline():
                 formatted = final_date.strftime("%d/%m/%Y")
                 status.set(f"Date of Deadline is: {formatted}")
                 statusl.configure(fg=successcolor)
-                dateofdeadline.set(formatted)
+                dateofdeadline.set(final_date.strftime("%d/%m/%Y"))
             elif dtypeSelect.get() == "Other":
                 if not otherde or not cd_type.get().strip():
-                    final_date.set("Enter custom type and date")
+                    status.set("Enter custom type and date")
                     statusl.configure(fg=errorcolor)
                     return
                 final_date = datetime.strptime(deadlinedate.get(), "%d/%m/%Y").date()
                 if final_date < ed:
                     status.set("Error: Deadline is before the event date.")
                     statusl.configure(fg=errorcolor)
+                    return
                 else:
                     days_left = (final_date - ed).days
                     status.set(f"Number of day(s) = {days_left}")
@@ -193,6 +195,7 @@ def cal_deadline():
             else:
                 status.set("Select a deadline type or enter a date")
                 statusl.configure(fg=errorcolor)
+    
     except ValueError:
         status.set("Invalid date input!")
         statusl.configure(fg=errorcolor)
@@ -215,6 +218,7 @@ def clear_func():
     eventname.delete(0, tk.END)
     eventdate.delete(0, tk.END)
     dtypeSelect.set("")
+    cd_type.set('')
     deadlinedate.delete(0, tk.END)
     dropdown.configure(state="readonly")
     otherde.grid_remove()
@@ -239,7 +243,6 @@ btnframe2.pack(pady=5)
 
 # save btn
 saved_events = []
-
 
 def save_event():
     if eventdate.get() == "":
@@ -296,10 +299,12 @@ def toggle_checkbox(event, tree):
     new_state = "☑" if current == "☐" else "☐"
     values[0] = new_state
 
+    tree.item(row_id, values=values)
+
     event_name = values[1]
     for ev in saved_events:
         if ev["event_name"] == event_name:
-            ev["done"] = new_state == "☑"
+            ev["done"] = (new_state == "☑")
 
             if ev["done"]:
                 tree.item(row_id, tags="completed")
@@ -328,14 +333,14 @@ def open_notes(event_data):
 
     cdframe = tk.Frame(detail_win, bg=cardbg, padx=20, pady=20)
     cdframe.pack(fill="both", expand=True, padx=20, pady=20)
-    title1 = tk.Label(
+    titlel = tk.Label(
         cdframe,
         text="Event Notes",
         font=("Segoe UI", 16, "bold"),
         fg=mainaccent,
         bg=cardbg,
     )
-    title1.pack(anchor="w", pady=10)
+    titlel.pack(anchor="w", pady=10)
     evlabel = tk.Label(
         cdframe,
         text=f"Event: {event_data['event_name']}",
@@ -400,7 +405,7 @@ def tree_click_handler(event, tree):
         values = tree.item(row_id, "values")
         event_name = values[1]
 
-        confirm = messagebox.askyesno("Delete Event", "Delete Event '(event_name)'?")
+        confirm = messagebox.askyesno("Delete Event", f"Delete Event '{event_name}'?")
 
         if confirm:
             delete_event(event_name, tree, row_id)
@@ -419,6 +424,10 @@ def urgency_color(days_left):
         return "#E0E0E0"
 
 def open_timeline():
+    if not saved_events:
+        messagebox.showinfo("Timeline", "No events to show on timeline.")
+        return
+
     timeline_win = tk.Toplevel(win)
     timeline_win.title("Events Timeline")
     timeline_win.geometry("1150x600")
@@ -476,8 +485,8 @@ def open_timeline():
         for i, (ev,s,e) in enumerate(p_events):
             y = start_y + i * row_h
             days_left= (e-today).days
-            canvas.create_text(20,y+16,text=ev['event_name'],anchor='w',font=bfont)
-            canvas.create_text(20,y+16,text=f"{s:%d %b} - {e: %d %b}",anchor='w',fill=mutedtext,
+            canvas.create_text(20,y,text=ev['event_name'],anchor='w',font=bfont)
+            canvas.create_text(20,y,text=f"{s:%d %b} → {e: %d %b}",anchor='w',fill=mutedtext,
                                font=('Segoe UI',9))
             x1= px_from_date(s)
             x2= px_from_date(e)
@@ -485,7 +494,7 @@ def open_timeline():
             canvas.create_rectangle(x1, y-bar_h//2,
                                     x2, y+bar_h//2,
                                     fill=urgency_color(days_left),outline='')
-            canvas.create_text(x1+6,y, text=f"{days_left}",anchor='w',
+            canvas.create_text(x1+6,y, text=f"{days_left}d",anchor='w',
                                fill='white',font=('Segoe UI',9,'bold'))
             
 

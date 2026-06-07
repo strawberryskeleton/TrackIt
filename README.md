@@ -7,3 +7,8 @@ Features:
 - use ui library ttkbootstrap
 - multiple views (table view, timeline view)
 - highlights for today's date and traffic light system for overall better ux
+
+
+
+
+[]deadline timline not working correctly
