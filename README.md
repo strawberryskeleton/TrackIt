@@ -8,6 +8,11 @@ Deadline tracker for lawyers in python using tkinter library
 - multiple views (table view, timeline view)
 - highlights for today's date and traffic light system for overall better ux
 
+## DEMO VIDEO
+
+https://github.com/user-attachments/assets/37e38965-64cc-4668-89af-58d820e1220f
+
+
 ## Screenshots
 
 main app view
