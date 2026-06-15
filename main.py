@@ -182,7 +182,7 @@ def cal_deadline():
                 return
             else:
                 days_left = (final_date - ed).days
-                status.set(f"Number of day(s) left = {days_left}")
+                status.set(f"Total day(s) between D-day and Event = {days_left}")
                 statusl.configure(fg=successcolor)
                 dateofdeadline.set(final_date.strftime("%d/%m/%Y"))
         # case 2:

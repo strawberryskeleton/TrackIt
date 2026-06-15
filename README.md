@@ -6,7 +6,8 @@ Deadline tracker for lawyers in python using tkinter library
 - track deadlines
 - use ui library ttkbootstrap
 - multiple views (table view, timeline view)
-- highlights for today's date and traffic light system for overall better ux
+- highlights for today's date 
+- traffic light system for overall better ux
 
 ## DEMO VIDEO
 
