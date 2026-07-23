@@ -34,8 +34,17 @@ When i was looking for app inspiration for particular use case (brainstorming lo
 - did a lot of debugging
 - learnt how to create executable file for apps
 
+## Run Locally
+1. Install `Python`
+2. `tkinter` module comes built-in in normal python installation for all OS. no need to install any modules separately.
+3. Clone this github repo
+4. Run `main.py`
+   - Python IDLE: open `main.py` and run the file
+   - From the terminal: run the file from root directory using command `python main.py`
+
+
 ## Credits
 - made by: [me](https://github.com/strawberryskeleton)
 - idea refinement help: my sister
-- libraries used: tkinter
+- libraries used: tkinter (pre-installed with python installation)
 - some debugging help (for color correcting on mac) from Gemini AI
